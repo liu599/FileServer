@@ -25,7 +25,7 @@ func Upload(c *gin.Context) {
 	files := form.File["file"]
 
 	for _, file := range files {
-		if err := c.SaveUploadedFile(file, "D:/Project/MyBlogCMS71/src/myrestapi/files/" + file.Filename); err != nil {
+		if err := c.SaveUploadedFile(file, "D:/Project/MyBlogCMS71/src/nekohandfileserver/files/" + file.Filename); err != nil {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
