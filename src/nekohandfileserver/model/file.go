@@ -63,3 +63,19 @@ func UpdateFile(fi data.NekohandFile) error {
 
 	return err
 }
+
+func FetchFile(fileId string) string {
+	var nfile data.NekohandFile
+	statement := fmt.Sprintf("select fileId, fileName from files where fileId = '%s'", fileId)
+	db, err := _func.MySqlGetDB("nekohand")
+	if err != nil {
+		return err.Error()
+	}
+	err = db.QueryRow(statement).Scan(&nfile.FileId, &nfile.FileName)
+
+	if err != nil {
+		return err.Error()
+	}
+
+	return nfile.FileId + "_" + nfile.FileName
+}

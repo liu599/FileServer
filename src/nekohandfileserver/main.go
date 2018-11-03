@@ -4,12 +4,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"nekohandfileserver/controller"
 	"os"
 	"strconv"
 	"nekohandfileserver/middleware/data"
 	"nekohandfileserver/middleware/func"
+	"net/http"
 )
 
 
@@ -50,8 +50,10 @@ func main() {
 		MaxAge:           86400,
 	}))
 	r.MaxMultipartMemory = 8 << 20 // 8 MiB
-	r.StaticFS("/files", http.Dir(sysFilePath))
+	r.Static("/files", sysFilePath)
+	r.StaticFS("/nhfiles", http.Dir(sysFilePath))
 	r.GET("/ping", controller.Pong)
+	r.GET("/nekofile/:fileid/*size", controller.File)
 	r.POST("/upload", controller.Upload)
 	r.Run(":17699") // 默认为8080端口
 }
