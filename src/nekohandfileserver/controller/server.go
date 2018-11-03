@@ -84,12 +84,14 @@ func Upload(c *gin.Context) {
 				return
 			}
 			md5s = append(md5s, md5st)
-			urls = append(urls, filePhyUrl)
+			urls = append(urls, salt + "_" + file.Filename)
 		}
 
 	}
 
 	c.JSON(http.StatusOK, gin.H{
+		"host": c.Request.URL.Host,
+		"router": "/nekofile/",
 		"file_md5_list": md5s,
 		"psy_path_list": urls,
 		"message": fmt.Sprintf("Uploaded successfully %d files with fields name=%s and email=%s.", len(files), name, email),
