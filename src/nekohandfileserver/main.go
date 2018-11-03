@@ -16,6 +16,7 @@ import (
 func main() {
 
 	//Configure()
+	//os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
 	maxIdle, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_IDLE"))
 	maxOpen, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_OPEN"))
 	source := os.Getenv("SERVER_DB_URL")
@@ -38,7 +39,7 @@ func main() {
 	//
 	r := gin.Default()
 	//
-	os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
+
 	sysFilePath := os.Getenv("SERVER_FILE_PATH")
 	r.Use(cors.New(cors.Config{
 		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
