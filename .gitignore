@@ -16,3 +16,5 @@
 .glide/
 vendor/
 src/github.com/
+privateConfig.go
+my-config.go

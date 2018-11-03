@@ -7,16 +7,63 @@ import (
 	"net/http/httptest"
 	"github.com/gin-gonic/gin"
 	"fmt"
-	"myrestapi/controller"
+	"nekohandfileserver/controller"
 	"bytes"
 	"mime/multipart"
 	"io"
+	"nekohandfileserver/middleware/data"
+	"nekohandfileserver/middleware/func"
+	"github.com/jmoiron/sqlx"
+	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
+const filesTableCreationQuery = `
+CREATE TABLE IF NOT EXISTS files
+(
+    fid      INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fileId   VARCHAR(50) UNIQUE NOT NULL,
+    hashId   VARCHAR(50) UNIQUE NOT NULL,
+	fileName   VARCHAR(100) UNIQUE NOT NULL,
+	createdAt  INT(64)  NOT NULL,
+	modifiedAt INT(64) NOT NULL
+) character set = utf8`
+
+var db *sqlx.DB
+
+var Pass_gen = "000000"
+
+var Neko_token = "4a2c4b"
+
+var NewDate = time.Now().Unix()
+
+
 func TestMain(m *testing.M) {
+	var Apps = make(map[string]data.Database)
+	Apps["nekohand"] = GetDataBase()
+	_func.AssignAppDataBaseList(Apps)
+
+	_func.AssignDatabaseFromList([]string{"nekohand"})
+	db, err := _func.MySqlGetDB("nekohand")
+	if err != nil {
+		fmt.Println("Error Database Connection")
+		return
+	}
+	insertOneData(db)
 	code := m.Run()
 	os.Exit(code)
 }
+
+func insertOneData(db *sqlx.DB) {
+	//fmt.Println(id, "Inserted")
+	statement := fmt.Sprintf("INSERT INTO files (fileId, hashId, fileName, createAt, modifiedAt) VALUES('%s', '%s', '%s', '%d', '%d')", bson.NewObjectId().Hex(), "123ajkdf3afdsaf", "afd.jpg", NewDate, NewDate)
+	_, err := db.Exec(statement)
+
+	if err != nil {
+		fmt.Println("Database error")
+	}
+}
+
 
 // 发送请求
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
