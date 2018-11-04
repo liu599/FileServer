@@ -1,6 +1,7 @@
 package test
 
 import (
+	_ "github.com/go-sql-driver/mysql"
 	"testing"
 	"os"
 	"net/http"
@@ -70,6 +71,7 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
+	engine.GET("/filelist", controller.FileList)
 	engine.GET("/ping", controller.Pong)
 	engine.POST("/upload", controller.Upload)
 	engine.ServeHTTP(rr, req)
@@ -117,6 +119,13 @@ func TestUploadFile(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/upload", bodyBuf)
 	//req.Header.Add("Content-Type", "multipart/form-data")
 	req.Header.Add("Content-Type", contentType)
+	response := executeRequest(req)
+	fmt.Println(response.Body)
+}
+
+func TestFileList(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/filelist", nil)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	response := executeRequest(req)
 	fmt.Println(response.Body)
 }

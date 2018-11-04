@@ -90,7 +90,6 @@ func Upload(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"host": c.Request.URL.Host,
 		"router": "/nekofile/",
 		"file_md5_list": md5s,
 		"psy_path_list": urls,
@@ -139,4 +138,15 @@ func File(c *gin.Context) {
 	c.Header("accept-ranges", "bytes")
 	c.Header("content-type", mimetype)
 	c.File(physicalPath)
+}
+
+func FileList(c *gin.Context) {
+	err, filelist := model.FetchFileList()
+	if err != nil {
+		c.String(http.StatusBadRequest, fmt.Sprintf("Error filelist %s", err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"list": filelist,
+	})
 }

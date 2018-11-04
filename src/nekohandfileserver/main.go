@@ -54,6 +54,7 @@ func main() {
 	r.Static("/files", sysFilePath)
 	r.StaticFS("/nhfiles", http.Dir(sysFilePath))
 	r.GET("/ping", controller.Pong)
+	r.GET("/filelist", controller.FileList)
 	r.GET("/nekofile/:fileid/*size", controller.File)
 	r.POST("/upload", controller.Upload)
 	r.Run(":17699") // 默认为8080端口
