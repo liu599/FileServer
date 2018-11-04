@@ -44,7 +44,6 @@ func RespondError(context *gin.Context, code int, err data.Error) {
 
 // Response
 func Response(context *gin.Context, code int, data gin.H) {
-	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Expose-Headers", "Access-Token, UUid, X-Real-Ip")
 	context.Header("X-Real-Ip", context.ClientIP())
 	//context.SetCookie("_nekohand_x3x", context.ClientIP(), 3600, "/", "blog.nekohand.moe", true, false)

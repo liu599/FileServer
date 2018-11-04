@@ -37,9 +37,10 @@ func main() {
 
 	_func.AssignDatabaseFromList([]string{"nekohand"})
 	//
-	r := gin.Default()
+	r := gin.New()
 	//
-
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 	sysFilePath := os.Getenv("SERVER_FILE_PATH")
 	r.Use(cors.New(cors.Config{
 		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
