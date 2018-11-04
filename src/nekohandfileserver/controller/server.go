@@ -15,6 +15,7 @@ import (
 	"encoding/base64"
 	"mime"
 	"path"
+	"nekohandfileserver/middleware/func"
 )
 
 func Pong(c *gin.Context) {
@@ -146,7 +147,10 @@ func FileList(c *gin.Context) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("Error filelist %s", err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"list": filelist,
-	})
+	list := make(map[string]interface{})
+	list["data"] = filelist
+	_func.Respond(c, http.StatusOK, list)
+	//c.JSON(http.StatusOK, gin.H{
+	//	"list": filelist,
+	//})
 }
