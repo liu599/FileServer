@@ -15,8 +15,8 @@ import (
 
 func main() {
 
-	Configure()
-	os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
+	//Configure()
+	//os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
 	maxIdle, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_IDLE"))
 	maxOpen, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_OPEN"))
 	source := os.Getenv("SERVER_DB_URL")
