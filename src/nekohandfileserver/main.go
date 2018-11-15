@@ -15,8 +15,8 @@ import (
 
 func main() {
 
-	//Configure()
-	//os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
+	Configure()
+	os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
 	maxIdle, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_IDLE"))
 	maxOpen, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_OPEN"))
 	source := os.Getenv("SERVER_DB_URL")
@@ -42,16 +42,16 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	sysFilePath := os.Getenv("SERVER_FILE_PATH")
-	//r.Use(cors.New(cors.Config{
-	//	AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
-	//	AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "User-Agent", "Referrer", "Host", "Token", "User", "Authorization", "X-Requested-With"},
-	//	ExposeHeaders:    []string{"Content-Length", "X-Real-Ip"},
-	//	AllowCredentials: true,
-	//	AllowAllOrigins:  false,
-	//	AllowOriginFunc:  func(origin string) bool { return true },
-	//	MaxAge:           86400,
-	//}))
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "User-Agent", "Referrer", "Host", "Token", "User", "Authorization", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length", "X-Real-Ip"},
+		AllowCredentials: true,
+		AllowAllOrigins:  false,
+		AllowOriginFunc:  func(origin string) bool { return true },
+		MaxAge:           86400,
+	}))
+	//r.Use(cors.Default())
 	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	r.Static("/files", sysFilePath)
 	r.StaticFS("/nhfiles", http.Dir(sysFilePath))
