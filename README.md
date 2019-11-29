@@ -2,7 +2,15 @@
 
 为服务器开发的静态文件系统。
 
-Current Version: 0.0.1beta 20181103ver
+## Version: 0.0.5beta 20191129ver
+
+- File Type Classification
+- File Type Inquiry
+- Go Mod 
+
+## Version: 0.0.1beta 20181103ver
+
+- Fundamental Indexing and upload.
 
 ## References
 
