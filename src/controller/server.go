@@ -10,12 +10,12 @@ import (
 	"encoding/hex"
 	"gopkg.in/mgo.v2/bson"
 	"strings"
-	"nekohandfileserver/model"
-	"nekohandfileserver/middleware/data"
+	"github.com/liu599/FileServer/src/model"
+	"github.com/liu599/FileServer/src/middleware/data"
 	"encoding/base64"
 	"mime"
 	"path"
-	"nekohandfileserver/middleware/func"
+	"github.com/liu599/FileServer/src/middleware/func"
 )
 
 func Pong(c *gin.Context) {

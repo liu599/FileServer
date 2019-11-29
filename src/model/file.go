@@ -1,9 +1,9 @@
 package model
 
 import (
-	"nekohandfileserver/middleware/data"
 	"fmt"
-	"nekohandfileserver/middleware/func"
+	"github.com/liu599/FileServer/src/middleware/data"
+	"github.com/liu599/FileServer/src/middleware/func"
 	"time"
 )
 

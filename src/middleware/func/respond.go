@@ -2,7 +2,7 @@ package _func
 
 import (
 
-	"nekohandfileserver/middleware/data"
+	"github.com/liu599/FileServer/src/middleware/data"
 
 	"github.com/gin-gonic/gin"
 )

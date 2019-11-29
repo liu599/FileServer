@@ -10,8 +10,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
-	"nekohandfileserver/middleware/data"
-	"nekohandfileserver/middleware/func"
+	"github.com/liu599/FileServer/src/middleware/data"
+	"github.com/liu599/FileServer/src/middleware/func"
 )
 
 func TokenAuthMiddleware() gin.HandlerFunc {

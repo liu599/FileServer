@@ -1,31 +1,33 @@
-package PictureServer
+package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"nekohandfileserver/controller"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/liu599/FileServer/src/middleware/data"
+	"github.com/liu599/FileServer/src/middleware/func"
+	"github.com/liu599/FileServer/src/controller"
+	"net/http"
 	"os"
 	"strconv"
-	"nekohandfileserver/middleware/data"
-	"nekohandfileserver/middleware/func"
-	"net/http"
-	"github.com/gin-contrib/cors"
 )
 
 
 func main() {
 
-	//Configure()
-	//os.Setenv("SERVER_FILE_PATH",  "D:/Pictures/")
+	Configure()
+	_ = os.Setenv("SERVER_FILE_PATH", "D://")
 	maxIdle, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_IDLE"))
 	maxOpen, _ := strconv.Atoi(os.Getenv("SERVER_DB_MAX_OPEN"))
 	source := os.Getenv("SERVER_DB_URL")
+
+
 
 	database := data.Database{
 		Driver: "mysql",
 		MaxIdle: maxIdle,
 		MaxOpen: maxOpen,
-		Name: "nekohand",
+		Name: "shana",
 		Source: source,
 	}
 
