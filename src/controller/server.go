@@ -1,17 +1,14 @@
 package controller
 
 import (
-	"crypto/md5"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/liu599/FileServer/src/data"
-	"github.com/liu599/FileServer/src/middleware/func"
 	"github.com/liu599/FileServer/src/model"
 	"github.com/liu599/FileServer/src/setting"
+	"github.com/liu599/FileServer/src/utils"
 	"gopkg.in/mgo.v2/bson"
-	"io"
 	"mime"
 	"net/http"
 	"os"
@@ -23,22 +20,6 @@ func Pong(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
 	})
-}
-
-func hashFileMd5(filePath string) (string, error) {
-	var returnMD5String string
-	file, err := os.Open(filePath)
-	if err != nil {
-		return returnMD5String, err
-	}
-	defer file.Close()
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return returnMD5String, err
-	}
-	hashInBytes := hash.Sum(nil)[:16]
-	returnMD5String = hex.EncodeToString(hashInBytes)
-	return returnMD5String, nil
 }
 
 func GenFilePath(filename string, salt string) string {
@@ -80,7 +61,7 @@ func Upload(c *gin.Context) {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
-		if md5st, err := hashFileMd5(filePhyUrl); err != nil {
+		if md5st, err := utils.HashFileMd5(filePhyUrl); err != nil {
 			_ = deleteFile(filePhyUrl)
 			c.String(http.StatusBadRequest, fmt.Sprintf("cannot generate file md5 err: %s", err.Error()))
 			return
@@ -125,11 +106,14 @@ func File(c *gin.Context) {
 	fileid := c.Param("fileid")
 	fmt.Println(fileid)
 	rootpath := setting.FileRoot
-	relativePath := model.FetchFile(fileid)
+	relativePath, err := model.FetchFile(fileid)
+	if err != nil {
+		c.String(http.StatusNotFound, fmt.Sprintf("Cannot find file, wrong id. %s", err.Error()))
+	}
 	physicalPath := rootpath + relativePath
-	fmt.Println(physicalPath)
+	//fmt.Println(physicalPath)
 	fileInfo, err2 := os.Stat(physicalPath)
-	fmt.Println(fileInfo)
+	//fmt.Println(fileInfo)
 	if err2 != nil {
 		if os.IsNotExist(err2) {
 			c.String(http.StatusBadRequest, fmt.Sprintf("Cannot find file, probably physical deleted. %s", err2.Error()))
@@ -153,16 +137,3 @@ func File(c *gin.Context) {
 	c.File(physicalPath)
 }
 
-func FileList(c *gin.Context) {
-	err, filelist := model.FetchFileList()
-	if err != nil {
-		c.String(http.StatusBadRequest, fmt.Sprintf("Error filelist %s", err.Error()))
-		return
-	}
-	list := make(map[string]interface{})
-	list["data"] = filelist
-	_func.Respond(c, http.StatusOK, list)
-	//c.JSON(http.StatusOK, gin.H{
-	//	"list": filelist,
-	//})
-}

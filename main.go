@@ -49,10 +49,16 @@ func main() {
 	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	r.Static("/files", sysFilePath)
 	r.StaticFS("/nhfiles", http.Dir(sysFilePath))
+	// Router
 	r.GET("/ping", controller.Pong)
 	r.GET("/filelist", controller.FileList)
+	r.POST("/filetype", controller.FileListByType)
 	r.GET("/nekofile/:fileid/*size", controller.File)
+
 	r.POST("/upload", controller.Upload)
+	r.POST("/fix", controller.Fix)
+
+
 	er := r.Run(setting.HTTPPort) // 默认为8080端口
 	if er != nil {
 		log.Fatalf("Server cannot start: ': %v", er)

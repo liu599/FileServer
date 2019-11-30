@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"bytes"
@@ -15,7 +15,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -76,6 +78,8 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	engine.GET("/filelist", controller.FileList)
 	engine.GET("/ping", controller.Pong)
 	engine.POST("/upload", controller.Upload)
+	engine.POST("/filelist", controller.FileListByType)
+	engine.POST("/fix", controller.Fix)
 	engine.ServeHTTP(rr, req)
 
 	return rr
@@ -90,7 +94,7 @@ func TestBasicServer(t *testing.T) {
 
 
 func TestUploadFile(t *testing.T) {
-	filename := "D:/Project/PictureServer/test/QQ图片20180812010011.jpg"
+	filename := "D:/Project/PictureServer/test/QQ图片20180812010356.jpg"
 	filenamex := "QQ图片20180812010011.jpg"
 	/*
 		application/x-www-form-urlencoded	在发送前编码所有字符（默认）
@@ -136,7 +140,28 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileCatch(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/nekofile/5db884d458adfe413b4be2a2/", nil)
+	//req, _ := http.NewRequest("GET", "/nekofile/5de23ff45c964c287cd25586/", nil)
+	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//response := executeRequest(req)
+	//fmt.Println(response.Body)
+	fmt.Println(1)
+}
+
+func TestFileListByType(t *testing.T) {
+	//form := url.Values{}
+	//form.Add("filetype", "mp3")
+	//req, _ := http.NewRequest("POST", "/filelist", strings.NewReader(form.Encode()))
+	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//response := executeRequest(req)
+	//fmt.Println(response.Body)
+	fmt.Println(1)
+}
+
+func TestFileFolderFix(t *testing.T) {
+	form := url.Values{}
+	form.Add("userpath", "D:/homex/AC")
+	form.Add("filetype", "jpeg")
+	req, _ := http.NewRequest("POST", "/fix", strings.NewReader(form.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	response := executeRequest(req)
 	fmt.Println(response.Body)
