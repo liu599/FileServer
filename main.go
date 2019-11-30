@@ -52,7 +52,7 @@ func main() {
 	// Router
 	r.GET("/ping", controller.Pong)
 	r.GET("/filelist", controller.FileList)
-	r.POST("/filetype", controller.FileListByType)
+	r.POST("/filelist", controller.FileListByType)
 	r.GET("/nekofile/:fileid/*size", controller.File)
 
 	r.POST("/upload", controller.Upload)
