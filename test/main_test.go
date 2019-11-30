@@ -1,21 +1,22 @@
 package test
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"testing"
-	"os"
+	"github.com/jmoiron/sqlx"
+	"github.com/liu599/FileServer/src/controller"
+	"github.com/liu599/FileServer/src/data"
+	"github.com/liu599/FileServer/src/middleware/func"
+	"github.com/liu599/FileServer/src/setting"
+	"gopkg.in/mgo.v2/bson"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"github.com/gin-gonic/gin"
-	"fmt"
-	"nekohandfileserver/controller"
-	"bytes"
-	"mime/multipart"
-	"io"
-	"nekohandfileserver/middleware/data"
-	"nekohandfileserver/middleware/func"
-	"github.com/jmoiron/sqlx"
-	"gopkg.in/mgo.v2/bson"
+	"os"
+	"testing"
 	"time"
 )
 
@@ -32,18 +33,19 @@ CREATE TABLE IF NOT EXISTS files
 
 var db *sqlx.DB
 
-var Pass_gen = "000000"
-
-var Neko_token = "4a2c4b"
-
 var NewDate = time.Now().Unix()
 
 
 func TestMain(m *testing.M) {
 	var Apps = make(map[string]data.Database)
-	Apps["nekohand"] = GetDataBase()
+	Apps["nekohand"] = data.Database{
+		Driver: "mysql",
+		MaxIdle: 2,
+		MaxOpen: 15,
+		Name: "nekohand",
+		Source: setting.Source,
+	}
 	_func.AssignAppDataBaseList(Apps)
-
 	_func.AssignDatabaseFromList([]string{"nekohand"})
 	db, err := _func.MySqlGetDB("nekohand")
 	if err != nil {
@@ -88,7 +90,8 @@ func TestBasicServer(t *testing.T) {
 
 
 func TestUploadFile(t *testing.T) {
-	filename := "D:/Project/MyBlogCMS71/src/myrestapi/test/DqCKyZUVYAEDHxN.jpg"
+	filename := "D:/Project/PictureServer/test/QQ图片20180812010011.jpg"
+	filenamex := "QQ图片20180812010011.jpg"
 	/*
 		application/x-www-form-urlencoded	在发送前编码所有字符（默认）
 		multipart/form-data	 不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。
@@ -98,8 +101,9 @@ func TestUploadFile(t *testing.T) {
 	bodyWriter := multipart.NewWriter(bodyBuf)
     _ = bodyWriter.WriteField("name", "tokei")
     _ = bodyWriter.WriteField("email", "460512944@qq.com")
+    _ = bodyWriter.WriteField("relativePath", "blue/red/")
 	//关键的一步操作
-	fileWriter, err := bodyWriter.CreateFormFile("files", filename)
+	fileWriter, err := bodyWriter.CreateFormFile("files", filenamex)
 	if err != nil {
 		fmt.Println("error writing to buffer")
 	}
@@ -115,7 +119,7 @@ func TestUploadFile(t *testing.T) {
 	_, err = io.Copy(fileWriter, fh)
 
 	contentType := bodyWriter.FormDataContentType()
-	bodyWriter.Close()
+	_ = bodyWriter.Close()
 	req, _ := http.NewRequest("POST", "/upload", bodyBuf)
 	//req.Header.Add("Content-Type", "multipart/form-data")
 	req.Header.Add("Content-Type", contentType)
@@ -124,7 +128,15 @@ func TestUploadFile(t *testing.T) {
 }
 
 func TestFileList(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/filelist", nil)
+	//req, _ := http.NewRequest("GET", "/filelist", nil)
+	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//response := executeRequest(req)
+	//fmt.Println(response.Body)
+	fmt.Println(1)
+}
+
+func TestFileCatch(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/nekofile/5db884d458adfe413b4be2a2/", nil)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	response := executeRequest(req)
 	fmt.Println(response.Body)

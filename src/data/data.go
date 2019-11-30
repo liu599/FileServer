@@ -21,5 +21,6 @@ type (
 		HashId   string   `json:"filehash"`
 		CreatedAt  int64  `json:"createdAt"`
 		ModifiedAt int64  `json:"modifiedAt"`
+		RelativePath string `json:"relativePath"`
 	}
 )

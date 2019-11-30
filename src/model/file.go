@@ -2,7 +2,7 @@ package model
 
 import (
 	"fmt"
-	"github.com/liu599/FileServer/src/middleware/data"
+	"github.com/liu599/FileServer/src/data"
 	"github.com/liu599/FileServer/src/middleware/func"
 	"time"
 )
@@ -27,7 +27,7 @@ func FindFile(fi data.NekohandFile) (error, bool) {
 func CreateFile(fi data.NekohandFile) (error) {
 	createdTime := time.Now().Unix()
 
-	statement := fmt.Sprintf("INSERT INTO files (fileId, hashId, fileName, createdAt, modifiedAt) VALUES('%s', '%s', '%s', '%d', '%d')", fi.FileId, fi.HashId, fi.FileName, createdTime, createdTime)
+	statement := fmt.Sprintf("INSERT INTO files (fileId, hashId, fileName, createdAt, modifiedAt, relativePath) VALUES('%s', '%s', '%s', '%d', '%d', '%s')", fi.FileId, fi.HashId, fi.FileName, createdTime, createdTime, fi.RelativePath)
 
 	db, err := _func.MySqlGetDB("nekohand")
 	if err != nil {
@@ -66,18 +66,18 @@ func UpdateFile(fi data.NekohandFile) error {
 
 func FetchFile(fileId string) string {
 	var nfile data.NekohandFile
-	statement := fmt.Sprintf("select fileId, fileName from files where fileId = '%s'", fileId)
+	statement := fmt.Sprintf("select fileId, fileName, relativePath from files where fileId = '%s'", fileId)
 	db, err := _func.MySqlGetDB("nekohand")
 	if err != nil {
 		return err.Error()
 	}
-	err = db.QueryRow(statement).Scan(&nfile.FileId, &nfile.FileName)
+	err = db.QueryRow(statement).Scan(&nfile.FileId, &nfile.FileName, &nfile.RelativePath)
 
 	if err != nil {
 		return err.Error()
 	}
 
-	return nfile.FileId + "_" + nfile.FileName
+	return nfile.RelativePath + "/" + nfile.FileId + "_" + nfile.FileName
 }
 
 func FetchFileList() (error, []data.NekohandFile) {
@@ -96,7 +96,7 @@ func FetchFileList() (error, []data.NekohandFile) {
 
 	for rows.Next() {
 		var nf data.NekohandFile
-		if err = rows.Scan(&nf.FID, &nf.FileId, &nf.HashId, &nf.FileName, &nf.CreatedAt, &nf.ModifiedAt); err != nil {
+		if err = rows.Scan(&nf.FID, &nf.FileId, &nf.HashId, &nf.FileName, &nf.CreatedAt, &nf.ModifiedAt, &nf.RelativePath); err != nil {
 			return err, nil
 		}
 		nfiles = append(nfiles, nf)

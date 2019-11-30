@@ -1,21 +1,22 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"fmt"
-	"os"
 	"crypto/md5"
-	"io"
-	"encoding/hex"
-	"gopkg.in/mgo.v2/bson"
-	"strings"
-	"github.com/liu599/FileServer/src/model"
-	"github.com/liu599/FileServer/src/middleware/data"
 	"encoding/base64"
-	"mime"
-	"path"
+	"encoding/hex"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/liu599/FileServer/src/data"
 	"github.com/liu599/FileServer/src/middleware/func"
+	"github.com/liu599/FileServer/src/model"
+	"github.com/liu599/FileServer/src/setting"
+	"gopkg.in/mgo.v2/bson"
+	"io"
+	"mime"
+	"net/http"
+	"os"
+	"path"
+	"strings"
 )
 
 func Pong(c *gin.Context) {
@@ -41,8 +42,7 @@ func hashFileMd5(filePath string) (string, error) {
 }
 
 func GenFilePath(filename string, salt string) string {
-	rootpath := os.Getenv("SERVER_FILE_PATH")
-	return rootpath + strings.Join([]string{salt, filename}, "_")
+	return strings.Join([]string{salt, filename}, "_")
 }
 
 func deleteFile(fileUrl string) error {
@@ -52,26 +52,36 @@ func deleteFile(fileUrl string) error {
 func Upload(c *gin.Context) {
 	var md5s []string
 	var urls []string
+	var relativePath = ""
 	name := c.PostForm("name")
 	email := c.PostForm("email")
-
+	relativePath = c.PostForm("relativePath")
+	rootPath := setting.FileRoot
+    fileRootPath := rootPath+relativePath
+	//fmt.Println(fileRootPath) // /a/b/c/d 或 \a\b\c\d
+	//fmt.Println(fileRootPath[1:]) // /a/b/c/d 或 \a\b\c\d
+	// 创建目录试试
+	if err := os.MkdirAll(fileRootPath, 0777); err != nil {
+		fmt.Println(err)
+	}
 	// Multipart form
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 		return
 	}
-	files := form.File["file"]
+	files := form.File["files"]
 
 	for _, file := range files {
 		salt := bson.NewObjectId().Hex()
-		filePhyUrl := GenFilePath(file.Filename, salt)
+		filePhyUrl := rootPath + relativePath + GenFilePath(file.Filename, salt)
+		fmt.Println(filePhyUrl)
 		if err := c.SaveUploadedFile(file, filePhyUrl); err != nil {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
 		if md5st, err := hashFileMd5(filePhyUrl); err != nil {
-			deleteFile(filePhyUrl)
+			_ = deleteFile(filePhyUrl)
 			c.String(http.StatusBadRequest, fmt.Sprintf("cannot generate file md5 err: %s", err.Error()))
 			return
 		} else {
@@ -80,7 +90,7 @@ func Upload(c *gin.Context) {
 				HashId:md5st,
 				FileName:file.Filename,
 			}); err != nil {
-				deleteFile(filePhyUrl)
+				_ = deleteFile(filePhyUrl)
 				c.String(http.StatusBadRequest, fmt.Sprintf("database error: cannot create file %s", err.Error()))
 				return
 			}
@@ -102,22 +112,24 @@ const base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 
 var coder = base64.NewEncoding(base64Table)
 
-func Base64Encode(encode_byte []byte) []byte {
-	return []byte(coder.EncodeToString(encode_byte))
+func Base64Encode(encodeByte []byte) []byte {
+	return []byte(coder.EncodeToString(encodeByte))
 }
 
-func Base64Decode(decode_byte []byte) ([]byte, error) {
-	return coder.DecodeString(string(decode_byte))
+func Base64Decode(decodeByte []byte) ([]byte, error) {
+	return coder.DecodeString(string(decodeByte))
 
 }
 
 func File(c *gin.Context) {
 	fileid := c.Param("fileid")
-	rootpath := os.Getenv("SERVER_FILE_PATH")
+	fmt.Println(fileid)
+	rootpath := setting.FileRoot
 	relativePath := model.FetchFile(fileid)
 	physicalPath := rootpath + relativePath
+	fmt.Println(physicalPath)
 	fileInfo, err2 := os.Stat(physicalPath)
-	//fmt.Println(fileInfo)
+	fmt.Println(fileInfo)
 	if err2 != nil {
 		if os.IsNotExist(err2) {
 			c.String(http.StatusBadRequest, fmt.Sprintf("Cannot find file, probably physical deleted. %s", err2.Error()))
