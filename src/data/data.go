@@ -22,5 +22,6 @@ type (
 		CreatedAt  int64  `json:"createdAt"`
 		ModifiedAt int64  `json:"modifiedAt"`
 		RelativePath string `json:"relativePath"`
+		Src string `json:"src"`
 	}
 )

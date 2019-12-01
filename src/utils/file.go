@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"io"
 	"io/ioutil"
@@ -56,7 +57,7 @@ func GetAllFiles(dirPth string, fileType string) (files []string, err error) {
 			// 过滤指定格式
 			ok := strings.HasSuffix(strings.ToLower(fi.Name()), "."+fileType)
 			if ok {
-				files = append(files, dirPth +PthSep+ "|"+fi.Name())
+				files = append(files, dirPth +PthSep+ "||"+fi.Name())
 			}
 		}
 	}
@@ -86,4 +87,23 @@ func HashFileMd5(filePath string) (string, error) {
 	hashInBytes := hash.Sum(nil)[:16]
 	returnMD5String = hex.EncodeToString(hashInBytes)
 	return returnMD5String, nil
+}
+
+func SQLEscape(query string) (string, error) {
+	return "", nil
+}
+
+
+
+const base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+var coder = base64.NewEncoding(base64Table)
+
+func Base64Encode(encodeByte []byte) []byte {
+	return []byte(coder.EncodeToString(encodeByte))
+}
+
+func Base64Decode(decodeByte []byte) ([]byte, error) {
+	return coder.DecodeString(string(decodeByte))
+
 }

@@ -28,7 +28,7 @@ var (
 
 func init() {
 	var err error
-	examplePath := filepath.FromSlash("./src/conf/my.ini")
+	examplePath := filepath.FromSlash("./src/conf/my-config.ini")
 	Cfg, err = ini.Load(examplePath)
 	if err != nil {
 		log.Fatalf("Fail to parse 'conf/my.ini': %v", err)

@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/liu599/FileServer/src/data"
 	"github.com/liu599/FileServer/src/middleware/func"
+	"github.com/liu599/FileServer/src/setting"
 	"github.com/liu599/FileServer/src/utils"
 	"gopkg.in/mgo.v2/bson"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,13 +34,24 @@ func FindFile(fi data.NekohandFile) (error, bool) {
 func CreateFile(fi data.NekohandFile) (error) {
 	createdTime := time.Now().Unix()
 
-	var relativePathSQL string
+	//relativePathSQL, err := url.Parse(fi.RelativePath)
 
-	relativePathSQL = filepath.ToSlash(fi.RelativePath)
+	relativePathtemp := filepath.ToSlash(fi.RelativePath)
 
-	fmt.Println(relativePathSQL)
+	fNamex := strings.Split(fi.FileName, "__")
+    fNamep := fNamex[len(fNamex) - 1]
+	//strings.Replace(relativePathtemp, `'`, `\'`, -1)
+	//strings.Replace(fName, `'`, `\'`, -1)
 
-	statement := fmt.Sprintf("INSERT INTO files (fileId, hashId, fileName, createdAt, modifiedAt, relativePath) VALUES('%s', '%s', '%s', '%d', '%d', '%s')", fi.FileId, fi.HashId, fi.FileName, createdTime, createdTime, relativePathSQL)
+	relativePathSQL, err := url.Parse(filepath.ToSlash(relativePathtemp))
+
+	if err != nil {
+		return err
+	}
+
+	fName, _ := url.Parse(fNamep)
+
+	statement := fmt.Sprintf("INSERT INTO files (fileId, hashId, fileName, createdAt, modifiedAt, relativePath) VALUES('%s', '%s', '%s', '%d', '%d', '%s')", fi.FileId, fi.HashId, fName, createdTime, createdTime, relativePathSQL.EscapedPath())
 
 	fmt.Println(statement)
 
@@ -90,7 +103,10 @@ func FetchFile(fileId string) (string, error) {
 		return "_", err
 	}
 
-	return nfile.RelativePath + nfile.FileId + "_" + nfile.FileName, nil
+	sd, _ := url.PathUnescape(nfile.RelativePath)
+	sf, _ := url.PathUnescape(nfile.FileName)
+
+	return sd + nfile.FileId + "__" + sf, nil
 }
 
 func FetchFileList(fileType string) (error, []data.NekohandFile) {
@@ -113,6 +129,7 @@ func FetchFileList(fileType string) (error, []data.NekohandFile) {
 			return err, nil
 		}
 		ftype := strings.Split(nf.FileName, ".")
+		nf.Src = setting.FileRoot + nf.RelativePath + nf.FileId + "__" + nf.FileName
 		if fileType == "ALL" {
 			nfiles = append(nfiles, nf)
 		}
@@ -132,7 +149,7 @@ func FixPath(userpath string, filetype string) error {
 	for _, file := range xfiles {
 		salt := bson.NewObjectId().Hex()
 		// tmp[0] path, tmp[1] filename tmp2 relative path
-		tmp := strings.Split(file,"|")
+		tmp := strings.Split(file,"||")
 		tmp2 := strings.Split(tmp[0], userpath)
 		filephyurl := strings.Join(tmp, "")
 		if mdst, err = utils.HashFileMd5(filephyurl); err != nil {
@@ -147,10 +164,14 @@ func FixPath(userpath string, filetype string) error {
 			FileName: tmp[1],
 			RelativePath: filepath.FromSlash(strings.Join(tmp2, "")),
 		}); err != nil {
-			return err
+			fmt.Println("create File Error")
+			//TODO: List failure files
+			continue
 		}
 
-		err = os.Rename(filephyurl, tmp[0]+salt+"_"+tmp[1])
+		realname := strings.Split(tmp[1], "__")
+
+		err = os.Rename(filephyurl, tmp[0]+salt+"__"+realname[len(realname) - 1])
 
 		if err != nil {
 			return err

@@ -79,6 +79,7 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	engine.GET("/ping", controller.Pong)
 	engine.POST("/upload", controller.Upload)
 	engine.POST("/filelist", controller.FileListByType)
+	engine.GET("/nekofile/:fileid/*size", controller.File)
 	engine.POST("/fix", controller.Fix)
 	engine.ServeHTTP(rr, req)
 
@@ -94,6 +95,7 @@ func TestBasicServer(t *testing.T) {
 
 
 func TestUploadFile(t *testing.T) {
+	return
 	filename := "D:/Project/PictureServer/test/QQ图片20180812010356.jpg"
 	filenamex := "QQ图片20180812010011.jpg"
 	/*
@@ -140,10 +142,10 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileCatch(t *testing.T) {
-	//req, _ := http.NewRequest("GET", "/nekofile/5de23ff45c964c287cd25586/", nil)
-	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	//response := executeRequest(req)
-	//fmt.Println(response.Body)
+	req, _ := http.NewRequest("GET", "/nekofile/5de3d49c5c964c0ec8c8ca76/", nil)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	response := executeRequest(req)
+	fmt.Println(response)
 	fmt.Println(1)
 }
 
@@ -159,8 +161,8 @@ func TestFileListByType(t *testing.T) {
 
 func TestFileFolderFix(t *testing.T) {
 	form := url.Values{}
-	form.Add("userpath", "D:/homex/AC")
-	form.Add("filetype", "jpeg")
+	form.Add("userpath", "E:/[Nemuri] BanG Dream! バンドリ！(2016-2019) [MP3]/[2016-2019] Poppin'Party/moc")
+	form.Add("filetype", "mp3")
 	req, _ := http.NewRequest("POST", "/fix", strings.NewReader(form.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	response := executeRequest(req)

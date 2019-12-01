@@ -1,19 +1,20 @@
 package controller
 
 import (
-	"encoding/base64"
 	"fmt"
+	"mime"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/liu599/FileServer/src/data"
 	"github.com/liu599/FileServer/src/model"
 	"github.com/liu599/FileServer/src/setting"
 	"github.com/liu599/FileServer/src/utils"
 	"gopkg.in/mgo.v2/bson"
-	"mime"
-	"net/http"
-	"os"
-	"path"
-	"strings"
 )
 
 func Pong(c *gin.Context) {
@@ -23,13 +24,13 @@ func Pong(c *gin.Context) {
 }
 
 func GenFilePath(filename string, salt string) string {
-	return strings.Join([]string{salt, filename}, "_")
+	return strings.Join([]string{salt, filename}, "__")
 }
 
 func deleteFile(fileUrl string) error {
 	return os.Remove(fileUrl)
 }
-
+// 文件上传
 func Upload(c *gin.Context) {
 	var md5s []string
 	var urls []string
@@ -89,19 +90,7 @@ func Upload(c *gin.Context) {
 	})
 }
 
-const base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-var coder = base64.NewEncoding(base64Table)
-
-func Base64Encode(encodeByte []byte) []byte {
-	return []byte(coder.EncodeToString(encodeByte))
-}
-
-func Base64Decode(decodeByte []byte) ([]byte, error) {
-	return coder.DecodeString(string(decodeByte))
-
-}
-
+// 返回文件
 func File(c *gin.Context) {
 	fileid := c.Param("fileid")
 	fmt.Println(fileid)
@@ -109,8 +98,12 @@ func File(c *gin.Context) {
 	relativePath, err := model.FetchFile(fileid)
 	if err != nil {
 		c.String(http.StatusNotFound, fmt.Sprintf("Cannot find file, wrong id. %s", err.Error()))
+		return
 	}
-	physicalPath := rootpath + relativePath
+	fmt.Println(relativePath)
+	kk, _ := url.PathUnescape(relativePath)
+	fmt.Println(kk)
+	physicalPath := rootpath + kk
 	//fmt.Println(physicalPath)
 	fileInfo, err2 := os.Stat(physicalPath)
 	//fmt.Println(fileInfo)
@@ -118,6 +111,7 @@ func File(c *gin.Context) {
 		if os.IsNotExist(err2) {
 			c.String(http.StatusBadRequest, fmt.Sprintf("Cannot find file, probably physical deleted. %s", err2.Error()))
 		}
+		return
 	}
 	//file, err := os.OpenFile(physicalPath, os.O_RDONLY, 0666)
 	//if err != nil {

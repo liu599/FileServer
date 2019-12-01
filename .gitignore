@@ -20,5 +20,6 @@ privateConfig.go
 my-config.go
 *.jpg
 my-script
+my-config.ini
 
 *.ini
